@@ -1,0 +1,41 @@
+---
+title: "Architecture"
+sidebarTitle: "Architecture"
+description: "Architecture de la plateforme : registry de services et arborescence des serveurs applicatifs."
+---
+
+## Vue d'ensemble
+
+Cette page décrit l'architecture cible de la plateforme, basée sur un **registre de services** comme source de vérité.
+
+## Registre de services
+
+Le registre vit dans `registry/` à la racine du dépôt :
+
+- `registry/services.yml` — liste des services et leur statut de cycle de vie
+- `registry/environments.yml` — environnements de déploiement
+- `registry/dependencies.yml` — dépendances entre services
+
+Le registre ne stocke **jamais** de valeurs de secrets, uniquement leurs noms (les secrets réels vivent dans les environnements GitHub).
+
+### Cycle de vie d'un service
+
+```
+planned → development → testing → staging → active → deprecated → removed
+```
+
+## Arborescence des serveurs
+
+Les futures intégrations applicatives sont isolées sous `servers/` :
+
+- `servers/github` — intégration GitHub App
+- `servers/mcp` — serveur MCP
+- `servers/<additional-server>` — futurs serveurs additionnels
+
+Mintlify reste le serveur de documentation initial, avec une intégration modulaire des futurs serveurs.
+
+## Chaîne de traçabilité
+
+```
+Service → Issue → Branch → PR → CI → Preview → Approval → Production
+```

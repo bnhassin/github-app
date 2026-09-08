@@ -1,0 +1,31 @@
+---
+title: "Deployment"
+sidebarTitle: "Deployment"
+description: "Pipeline CI/CD et modèle de branches pour le déploiement de la plateforme."
+---
+
+## Modèle CI/CD
+
+Le pipeline suit le modèle **Validation → Preview → Production**, implémenté avec GitHub Actions :
+
+1. **Validation** — vérifie le registre et le code sur chaque Pull Request
+2. **Preview** — déploie un environnement de prévisualisation par PR
+3. **Production** — déploie sur `main` après approbation
+
+## Modèle de branches
+
+- `feature/*` — nouvelles fonctionnalités
+- `fix/*` — corrections de bugs
+- `chore/*` — tâches de maintenance
+- `docs/*` — documentation
+- `server/*` — travaux spécifiques à un serveur applicatif
+
+Toute modification passe par une Pull Request — pas d'écriture directe sur `main`.
+
+## Secrets et environnements
+
+Les secrets sont gérés via les **environnements de production GitHub**, jamais stockés dans le code source. Le registre (`registry/environments.yml`) ne référence que les noms des secrets.
+
+## Base path de la documentation
+
+Le site de documentation Mintlify est configuré pour servir sous `/docs` (sous-domaine `bnhassin`).
