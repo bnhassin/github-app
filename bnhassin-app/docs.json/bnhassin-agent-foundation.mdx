@@ -1,0 +1,101 @@
+---
+title: "BnhassinAgent — Official Foundation"
+sidebarTitle: "Official Foundation"
+description: "Official architecture baseline for the BnhassinAgent persistent agent, memory, database, testing, containers, CI/CD, GitHub Projects, Mintlify documentation, Preview and Production."
+---
+
+# BnhassinAgent — Official Foundation
+
+> **Status: Architecture baseline / Production preparation**
+
+This document defines the official technical foundation for **BnhassinAgent**. The repository `bnhassin/BnhassinAgent-Database` is the source of truth for the persistent agent runtime and database layer; this documentation project is the documentation source of truth.
+
+## Architecture objectives
+
+The foundation is validated against twelve delivery pillars:
+
+1. **Python + `pyproject.toml`** — reproducible package and development tooling.
+2. **PostgreSQL + SQLAlchemy + Alembic** — durable relational persistence and migrations.
+3. **Memory Engine** — capture, compression, retrieval and context injection across sessions.
+4. **Agent abstraction** — provider-neutral runtime contract.
+5. **OpenAI / Gemini providers** — isolated adapters behind the agent/provider interface.
+6. **pytest + coverage** — unit, integration and regression validation.
+7. **Docker Compose** — reproducible local/integration runtime with PostgreSQL.
+8. **GitHub CI/CD** — validation, container build/publish and documentation checks.
+9. **GitHub Projects** — delivery roadmap, ownership, status and release gates.
+10. **Mintlify documentation** — architecture, operations, integrations and release documentation.
+11. **Production preparation** — secrets, health checks, observability, migrations, rollback and security gates.
+12. **Production Preview** — a release candidate environment that must pass the same automated quality gates before production.
+
+## Reference architecture
+
+```text
+Client / Agent Runtime
+        |
+        v
+ BnhassinAgent Core
+   |          |
+   |          +--> Provider interface --> OpenAI adapter
+   |                              \----> Gemini adapter
+   |
+   +--> Memory Engine
+          |  capture / compress / retrieve / inject
+          v
+   Repository layer
+          |
+          v
+ PostgreSQL <--> Alembic migrations
+
+CI/CD -> tests -> Docker image -> Preview -> Production
+                     |
+                     +--> GitHub Projects release gates
+                     +--> Mintlify architecture / runbooks
+```
+
+## Persistence model
+
+The baseline data model is centered on `agents`, `sessions`, `messages`, `memories`, `context_snapshots` and `tool_events`. Embeddings/vector search remain an optional extension and should not block the first production-ready relational persistence layer.
+
+## Quality gates
+
+A release candidate is considered valid only when the following gates pass:
+
+- formatting/linting and type checks;
+- unit and integration tests with coverage;
+- database migration validation;
+- Docker image build and runtime smoke test;
+- provider configuration without secrets committed to source control;
+- Preview deployment health check;
+- documentation validation and broken-link checks;
+- production promotion only after Preview is green.
+
+## Security rule
+
+API keys, OAuth client secrets, database passwords and deployment tokens are runtime secrets. They must be supplied through environment variables or the hosting platform's secret store and must never be committed to Git.
+
+## 403 integration rule
+
+A `403 Forbidden` from a Vercel deployment URL is not automatically an application failure. It can indicate Vercel Authentication or deployment protection. Diagnosis must distinguish:
+
+- protected deployment access;
+- project/team permissions;
+- deployment status/build failure;
+- application runtime errors;
+- GitHub integration permissions.
+
+For a protected deployment, use authenticated Vercel project/deployment inspection or a temporary authenticated share mechanism rather than weakening application security merely to make a URL public.
+
+## Release sequence
+
+```text
+GitHub main
+  -> CI
+  -> Docker build
+  -> Preview
+  -> smoke / integration checks
+  -> release approval
+  -> Production
+  -> health + runtime monitoring
+```
+
+This sequence is the **BnhassinAgent official foundation**. Future features must extend these contracts rather than bypass them.
